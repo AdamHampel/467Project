@@ -1,7 +1,9 @@
 import 'dotenv/config';
 import express from 'express';
+//import multer from 'multer';
 import * as users from './users-model.mjs';
 import authRoutes from './auth-routes.mjs'; // Import your auth routes
+import * as pets from './pets-model.mjs';
 
 const PORT = process.env.PORT;
 const app = express();
@@ -138,6 +140,123 @@ app.put('/users/:_id', (req, res) => {
                     age: req.body.age,
                     email: req.body.email,
                     password: req.body.password
+                })
+            } else {
+                res.status(404).json({ Error: 'Document not found' });
+            }
+        })
+        .catch(error => {
+            console.error(error);
+            res.status(400).json({ Error: 'Request to update a document failed' });
+        });
+}
+);
+
+//const upload = multer({ dest: 'uploads/' }); // This will store the uploaded files in the uploads folder
+
+
+// CREATE controller for pets
+app.post('/pets', (req, res) => {
+    console.log('Post request received');
+    if (req.body.name.length <= 0 || req.body.type.length <= 0 || req.body.age.length <= 0)
+        res.status(400).json({ Error: "Invalid Request" })
+    else {
+        pets.createPet(
+            req.body.name,
+            req.body.type,
+            req.body.age
+        )
+            .then(pet => {
+                console.log('Created pet:', pet);
+                if (req.body.name.length > 0 || req.body.type > 0
+                    || req.body.age.length > 0) {
+                    res.status(201).json(pet);
+                } else {
+                    res.status(400).json({ Error: "Invalid Request" });
+                }
+            })
+            .catch(error => {
+                console.log(error);
+                res.status(400).json({ error: 'Creation of a document failed due to invalid syntax.' });
+            });
+    }
+});
+
+// RETRIEVE controller ****************************************************
+// GET pets by ID
+app.get('/pets/:_id', (req, res) => {
+    const petId = req.params._id;
+    pets.findPetById(petId)
+        //If promise is resolved, it is set to the value of pet
+        .then(pet => {
+            if (pet !== null) {
+                res.json(pet);
+            } else {
+                res.status(404).json({ Error: 'Document not found' });
+            }
+        })
+        .catch(error => {
+            res.status(400).json({ Error: 'Request to retrieve document failed' });
+        });
+
+});
+
+// GET pets filtered by name, type, age
+app.get('/pets', (req, res) => {
+    let filter = {};
+    // filter by name
+    if (req.query.name !== undefined) {
+        filter = { name: req.query.name };
+    }
+    // filter by type
+    if (req.query.type !== undefined) {
+        filter = { type: req.query.type };
+    }
+    // filter by age
+    if (req.query.age !== undefined) {
+        filter = { age: req.query.age };
+    }
+    pets.findPets(filter, '', 0)
+        .then(pets => {
+            res.send(pets);
+        })
+        .catch(error => {
+            console.error(error);
+            res.send({ Error: 'Request to retrieve documents failed' });
+        });
+});
+
+// DELETE Controller ******************************
+app.delete('/pets/:_id', (req, res) => {
+    pets.deleteById(req.params._id)
+        .then(deletedCount => {
+            if (deletedCount === 1) {
+                res.status(204).send();
+            } else {
+                res.status(404).json({ Error: 'Document not found' });
+            }
+        })
+        .catch(error => {
+            console.error(error);
+            res.send({ error: 'Request to delete a document failed' });
+        });
+});
+
+// UPDATE controller ************************************
+app.put('/pets/:_id', (req, res) => {
+    pets.replacePet(
+        req.params._id,
+        req.body.name,
+        req.body.type,
+        req.body.age
+    )
+        .then(numUpdated => {
+            if (numUpdated === 1) {
+                res.status(200).json({
+                    _id: req.params._id,
+                    name: req.body.name,
+                    age: req.body.type,
+                    email: req.body.age
                 })
             } else {
                 res.status(404).json({ Error: 'Document not found' });

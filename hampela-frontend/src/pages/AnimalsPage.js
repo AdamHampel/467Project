@@ -1,81 +1,58 @@
-import React, { useState } from 'react';
-import { useHistory } from "react-router-dom";
+import React from 'react';
+import Table from '../components/animalTable';
+import { useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 
-export const AnimalsPage = () => {
-
-    const [name, setName] = useState('');
-    const [age, setAge] = useState('');
-    const [email, setEmail] = useState('');
-    const [phoneNumber, setPhoneNumber] = useState('');
-
+function AnimalsPage({ setPet }) {
+    // Use the history for updating
     const history = useHistory();
 
-    const addUser = async () => {
-        const newUser = { name, age, email, phoneNumber };
-        const response = await fetch('/users', {
-            method: 'post',
-            body: JSON.stringify(newUser),
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-        if (response.status === 201) {
-            alert("Successfully added the user!");
+    // Use state to bring in the data
+    const [pets, setPets] = useState([]);
+
+    // RETRIEVE the list of pets
+    const loadPets = async () => {
+        const response = await fetch('/pets');
+        const pets = await response.json();
+        setPets(pets);
+    }
+
+
+    // UPDATE a pet
+    const onEditPet = async pet => {
+        setPet(pets);
+        history.push("/edit-pet");
+    }
+
+
+    // DELETE a pet  
+    const onDeletePet = async _id => {
+        const response = await fetch(`/pets/${_id}`, { method: 'DELETE' });
+        if (response.status === 204) {
+            const getResponse = await fetch('/pets');
+            const pets = await getResponse.json();
+            setPets(pets);
         } else {
-            alert(`Failed to add user, status code = ${response.status}`);
+            console.error(`Failed to delete pet with _id = ${_id}, status code = ${response.status}`)
         }
-        history.push("/");
-    };
+    }
 
+    // LOAD the pets
+    useEffect(() => {
+        loadPets();
+    }, []);
 
+    // DISPLAY the pets
     return (
         <>
             <article>
-                <h2>Create an Account</h2>
-                <p>Create an account with your name, age, email and phone number</p>
-                <form onSubmit={(e) => { e.preventDefault(); }}>
-                    <fieldset>
-                        <legend>Account Info</legend>
-                        <label for="name">Name</label>
-                        <input
-                            type="text"
-                            placeholder="Full Name"
-                            value={name}
-                            onChange={e => setName(e.target.value)}
-                            id="name" />
-
-                        <label for="age"> Age</label>
-                        <input
-                            type="number"
-                            value={age}
-                            placeholder="Age"
-                            onChange={e => setAge(e.target.value)}
-                            id="age" />
-
-                        <label for="email"> Email</label>
-                        <input
-                            type="text"
-                            placeholder="Email"
-                            value={email}
-                            onChange={e => setEmail(e.target.value)}
-                            id="email" />
-
-                        <label for="phoneNumber"> Phone Number</label>
-                        <input
-                            type="text"
-                            placeholder="Phone Number"
-                            value={phoneNumber}
-                            onChange={e => setPhoneNumber(e.target.value)}
-                            id="phoneNumber" />
-
-                        <label for="submit">
-                            <button
-                                type="submit"
-                                onClick={addUser}
-                                id="submit"
-                            >Add</button></label>
-                    </fieldset>
-                </form>
+                <h2>List of Pets</h2>
+                <p>A list of pets & their details</p>
+                <Table
+                    pets={pets}
+                    onEdit={onEditPet}
+                    onDelete={onDeletePet}
+                />
             </article>
         </>
     );

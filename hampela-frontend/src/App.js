@@ -14,6 +14,7 @@ import CreateAccountPage from './pages/CreateAccountPage';
 import EditUserPage from './pages/EditUserPage';
 import AnimalsPage from './pages/AnimalsPage';
 import YourAccountPage from './pages/YourAccountPage';
+import CreateAnimalPage from './pages/CreateAnimalPage';
 
 // Define the function that renders the content in routes using State.
 function App() {
@@ -55,6 +56,11 @@ function App() {
           <Route path="/view-animals">
             <AnimalsPage />
           </Route>
+
+          <Route path="/create-animal">
+            <CreateAnimalPage />
+          </Route>
+
         </main>
 
         <footer>

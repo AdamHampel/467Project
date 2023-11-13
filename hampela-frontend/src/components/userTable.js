@@ -1,5 +1,5 @@
 import React from 'react';
-import Row from './Row';
+import Row from './userRow';
 
 function Table({ users, onDelete, onEdit }) {
     return (

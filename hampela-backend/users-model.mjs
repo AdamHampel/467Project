@@ -2,16 +2,17 @@
 import mongoose from 'mongoose';
 import 'dotenv/config';
 
+const {createConnection} = mongoose;
 //mongodb://localhost:3000/users
 // Connect based on the .env file parameters.
-mongoose.connect(
-    process.env.MONGODB_CONNECT_STRING,
-    { useNewUrlParser: true }
+const userConnection = mongoose.createConnection(
+    process.env.MONGODB_CONNECT_STRING_USERS,
+    { useNewUrlParser: true, useUnifiedTopology: true }
 );
-const db = mongoose.connection;
+//const db = mongoose.connection;
 
 // Confirm that the database has connected and print a message in the console.
-db.once("open", (err) => {
+userConnection.once("open", (err) => {
     if (err) {
         res.status(500).json({ error: '500:Connection to the server failed.' });
     } else {
@@ -30,7 +31,7 @@ const userSchema = mongoose.Schema({
 });
 
 // Compile the model from the schema.
-const User = mongoose.model("User", userSchema);
+const User = userConnection.model('User', userSchema);
 
 
 // CREATE model *****************************************

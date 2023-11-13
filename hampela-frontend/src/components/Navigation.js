@@ -9,6 +9,7 @@ function Navigation() {
       <Link to="../login">Log In</Link>
       <Link to="../create-account">Create Account</Link>
       <Link to="../view-animals">Animals</Link>
+      <Link to="../create-animal">Create Animal</Link>
     </nav>
   );
 }
